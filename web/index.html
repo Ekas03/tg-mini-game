@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mini Game</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+</head>
+<body>
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  let score = 0;
+
+  const config = {
+    type: Phaser.AUTO,
+    width: 400,
+    height: 600,
+    backgroundColor: "#222",
+    scene: {
+      preload: function() {
+        this.load.image("dino", "https://i.imgur.com/Da6fFMW.png");
+      },
+      create: function() {
+        this.text = this.add.text(20, 20, "Очки: 0", { fontSize: "20px", fill: "#fff" });
+        this.dino = this.add.image(200, 300, "dino").setInteractive();
+
+        this.dino.on("pointerdown", () => {
+          score++;
+          this.text.setText("Очки: " + score);
+
+          // Отправляем результат на сервер
+          fetch("http://127.0.0.1:8000/score", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: tg.initDataUnsafe.user.id || 0, score })
+          });
+        });
+      }
+    }
+  };
+
+  new Phaser.Game(config);
+</script>
+</body>
+</html>
