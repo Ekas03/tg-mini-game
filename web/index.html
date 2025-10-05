@@ -1,47 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <title>Mini Game</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+  <meta charset="UTF-8">
+  <title>Игра с морковками</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .target {
+      position: absolute;
+      width: 80px;   /* размер картинки */
+      height: 80px;
+      cursor: pointer;
+      background-image: url("Carrot-PNG-Picture.png");
+      background-size: cover;   /* чтобы картинка растягивалась */
+      background-position: center;
+    }
+  </style>
 </head>
 <body>
-<script>
-  const tg = window.Telegram.WebApp;
-  tg.expand();
+  <div id="score">Очки: 0</div>
 
-  let score = 0;
+  <script>
+    let score = 0;
+    const scoreDiv = document.getElementById("score");
 
-  const config = {
-    type: Phaser.AUTO,
-    width: 400,
-    height: 600,
-    backgroundColor: "#222",
-    scene: {
-      preload: function() {
-        this.load.image("dino", "https://i.imgur.com/Da6fFMW.png");
-      },
-      create: function() {
-        this.text = this.add.text(20, 20, "Очки: 0", { fontSize: "20px", fill: "#fff" });
-        this.dino = this.add.image(200, 300, "dino").setInteractive();
+    function createTarget() {
+      const target = document.createElement("div");
+      target.classList.add("target");
 
-        this.dino.on("pointerdown", () => {
-          score++;
-          this.text.setText("Очки: " + score);
+      const size = 80;
+      const maxX = window.innerWidth - size;
+      const maxY = window.innerHeight - size;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
 
-          // Отправляем результат на сервер
-          fetch("http://127.0.0.1:8000/score", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: tg.initDataUnsafe.user.id || 0, score })
-          });
-        });
-      }
+      target.style.left = `${x}px`;
+      target.style.top = `${y}px`;
+
+      target.addEventListener("click", () => {
+        score++;
+        scoreDiv.textContent = "Очки: " + score;
+        target.remove();
+      });
+
+      document.body.appendChild(target);
     }
-  };
 
-  new Phaser.Game(config);
-</script>
+    // каждые 1.5 сек появляется новая морковка
+    setInterval(createTarget, 1500);
+  </script>
 </body>
 </html>
